@@ -1,0 +1,11 @@
+# 이미지
+*.png
+# 음성
+*.wav
+# 영상
+*.mp4
+# 폰트
+*.otf
+*.ttf
+# configuration
+*.txt
