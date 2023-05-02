@@ -61,13 +61,14 @@ class GenThread(QThread):
             image_dir = os.path.join(TEMP_DIR, time_str)
             if os.path.exists(image_dir):
                 shutil.rmtree(image_dir)
-            # 문제에 해당하는 이미지 생성
-            make_images(self.options, image_dir)
-            # 이미지와 오디오를 합쳐서 비디오 생성
-            video_path = os.path.join(OUTPUT_ROOT_DIR, time_str, f'{i+1}번째_영상.mp4')
-            times = [60 for option in self.options]
-            print(times)
-            image_and_audio_to_video(image_dir, None, video_path, '한국어', times)
+            for language in self.lang:
+                # 문제에 해당하는 이미지 생성
+                make_images(language, self.diff, self.options, image_dir)
+                # 이미지와 오디오를 합쳐서 비디오 생성
+                video_path = os.path.join(OUTPUT_ROOT_DIR, time_str, f'{i+1}번째_영상_{language}.mp4')
+                times = [option[1] for option in self.options]
+                print('times:', times)
+                image_and_audio_to_video(image_dir, None, video_path, language, times)
 
 
             

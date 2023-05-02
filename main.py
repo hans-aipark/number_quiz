@@ -14,8 +14,9 @@ class MainWindow(QWidget):
         self.selectedList = [0]
         # 5의 배수로 설정
         self.problem_list = ['15',' 20', '25', '30', '35']
-        self.problem_times = ['60', '50', '40']
-        self.foreign_languages = ['전체 선택', '영어', '중국어', '일본어', '스페인어', '인도네시아어', '포르투갈어', '베트남어', '힌두어', '프랑스어']
+        self.problem_times = ['40', '50', '60']
+        self.table_columns = ['문제 수', '시간', '색상', '문자', '폰트']
+        self.foreign_languages = ['전체 선택', '한국어', '영어', '중국어', '일본어', '스페인어', '인도네시아어', '포르투갈어']
         self.initUI()
 
     def initUI(self):
@@ -31,6 +32,12 @@ class MainWindow(QWidget):
         label = QLabel('언어 선택')
         vbox.addWidget(label)
         languages = ['한국어', '외국어']
+
+
+
+
+
+
         self.btns_lang = QButtonGroup()
         for i, l in enumerate(languages):
             btn = QPushButton(l)
@@ -54,10 +61,10 @@ class MainWindow(QWidget):
         vbox.addLayout(hbox)
 
         # 퀴즈 테이블
-        self.table_quiz = QTableWidget(0, 3)
+        self.table_quiz = QTableWidget(0, len(self.table_columns))
         header = self.table_quiz.horizontalHeader()
         header.setSectionResizeMode(QHeaderView.ResizeMode.Stretch)
-        self.table_quiz.setHorizontalHeaderLabels(['문제 수', '색상', '문자', '폰트', '시간'])
+        self.table_quiz.setHorizontalHeaderLabels(self.table_columns)
         self.table_quiz.itemSelectionChanged.connect(self.table_changed)
         vbox.addWidget(self.table_quiz)
 
@@ -83,6 +90,7 @@ class MainWindow(QWidget):
         self.show()
 
     def initDialog(self):
+        # ----------------------------------------------------------------
         # +n 버튼 dialog
         self.dialog_add_row = QDialog(self)
         self.dialog_add_row.setWindowTitle('Add row')
@@ -130,6 +138,7 @@ class MainWindow(QWidget):
         btn.clicked.connect(self.dialog_lang.close)
         vbox.addWidget(btn)
         self.dialog_lang.setLayout(vbox)
+        # ----------------------------------------------------------------
 
     def table_changed(self):
         self.selectedList.clear()        
@@ -166,23 +175,35 @@ class MainWindow(QWidget):
 
             btn_cnt = QComboBox()
             btn_cnt.addItems(self.problem_list)
+            btn_cnt.setCurrentIndex(2)
+            btn_time = QComboBox()
+            btn_time.addItems(self.problem_times)
+            btn_time.setCurrentIndex(2)
             btn_col = QPushButton('랜덤')
-            btn_lan = QPushButton('랜덤')
+            btn_text = QPushButton('랜덤')
+            btn_font = QPushButton('랜덤')
             btn_col.setCheckable(True)
-            btn_lan.setCheckable(True)
+            btn_text.setCheckable(True)
+            btn_font.setCheckable(True)
 
             if n_items >= 1:
                 cur_btn_cnt = self.table_quiz.cellWidget(n_items-1, 0)
-                cur_btn_col = self.table_quiz.cellWidget(n_items-1, 1)
-                cur_btn_lan = self.table_quiz.cellWidget(n_items-1, 2)
+                cur_btn_time = self.table_quiz.cellWidget(n_items-1, 1)
+                cur_btn_col = self.table_quiz.cellWidget(n_items-1, 2)
+                cur_btn_text = self.table_quiz.cellWidget(n_items-1, 3)
+                cur_btn_font = self.table_quiz.cellWidget(n_items-1, 4)
 
                 btn_cnt.setCurrentIndex(cur_btn_cnt.currentIndex())
+                btn_time.setCurrentIndex(cur_btn_time.currentIndex())
                 btn_col.setChecked(cur_btn_col.isChecked())
-                btn_lan.setChecked(cur_btn_lan.isChecked())
+                btn_text.setChecked(cur_btn_text.isChecked())
+                btn_font.setChecked(cur_btn_font.isChecked())
 
             self.table_quiz.setCellWidget(n_items, 0, btn_cnt)
-            self.table_quiz.setCellWidget(n_items, 1, btn_col)
-            self.table_quiz.setCellWidget(n_items, 2, btn_lan)
+            self.table_quiz.setCellWidget(n_items, 1, btn_time)
+            self.table_quiz.setCellWidget(n_items, 2, btn_col)
+            self.table_quiz.setCellWidget(n_items, 3, btn_text)
+            self.table_quiz.setCellWidget(n_items, 4, btn_font)
 
     def remove_row(self):
         n_items = self.table_quiz.rowCount()
@@ -193,17 +214,28 @@ class MainWindow(QWidget):
         self.selectedList = [self.table_quiz.rowCount()]
 
     def generate(self):
-        lang = self.btns_lang.checkedId()
+        lang_id = self.btns_lang.checkedId()
+        if lang_id == 0:
+            lang = ['한국어']
+        elif lang_id == 1:
+            # 외국어 체크 리스트 추출
+            lang = [btn.text() for btn in self.btns_foreign.buttons() if btn.isChecked() and btn.text() != '전체 선택']
+            print('foreign', lang)
+
         diff = self.btns_diff.checkedId()
         n_items = self.table_quiz.rowCount()
         if n_items < 1: return
         options = []
         for i in range(n_items):
-            n_probs = self.table_quiz.cellWidget(i, 0).currentIndex()
-            n_probs = int(self.problem_list[n_probs])
-            use_color = self.table_quiz.cellWidget(i, 1).isChecked()
-            use_char  = self.table_quiz.cellWidget(i, 2).isChecked()
-            options.append((n_probs, use_color, use_char))
+            n_prob = self.table_quiz.cellWidget(i, 0).currentIndex()
+            n_prob = int(self.problem_list[n_prob])
+            time_prob = self.table_quiz.cellWidget(i, 1).currentIndex()
+            time_prob = int(self.problem_times[time_prob])
+
+            use_color = self.table_quiz.cellWidget(i, 2).isChecked()
+            use_char  = self.table_quiz.cellWidget(i, 3).isChecked()
+            use_font  = self.table_quiz.cellWidget(i, 4).isChecked()
+            options.append((n_prob, time_prob, use_color, use_char, use_font))
         genDialog = GenarationDialog(self, lang, diff, options)
         genDialog.exec()
 
