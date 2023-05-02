@@ -10,12 +10,9 @@ from config import NUM_to_HAN, COLOR, FONT, MATRIX, LANGUAGE_CODE
 import logging
 logging.getLogger("PIL").setLevel(logging.WARNING)
 
-# Background image list
-BGI_LIST = glob(os.path.join('datas/image', '*.png'))
-COLOR_MAP = list(COLOR.values())
-FONT_MAP = list(FONT.values())
 
 def draw_text(canvas, n_probs, use_char, use_color, use_font):
+    global COLOR, FONT, MATRIX, COLOR_MAP, FONT_MAP
     # 매트릭스 크기, 위치 설정
     matrix_size = MATRIX['size'][str(n_probs)]
     matrix_pos = MATRIX['pos'][str(n_probs)]
@@ -24,7 +21,8 @@ def draw_text(canvas, n_probs, use_char, use_color, use_font):
     matrix_data = np.arange(1, n_probs+1)
     np.random.shuffle(matrix_data)
     # 세로 길이 5칸 고정
-    matrix_data = matrix_data.reshape((5, n_probs//5))
+    row, col = MATRIX['shape'][str(n_probs)]
+    matrix_data = matrix_data.reshape((row, col))
 
     # 그리기 도구 생성
     draw = ImageDraw.Draw(canvas)
@@ -57,20 +55,33 @@ def draw_text(canvas, n_probs, use_char, use_color, use_font):
 
             draw.text(cell_center, text, font=font, fill=text_color, anchor='mm')
 
-def make_images(lang, diff, options, save_dir='outputs'):
+def make_images(design_path, lang, diff, options, save_dir='outputs'):
     '''
     lang : language
     diff : diffuculty
     '''
+    config = json.load(open(os.path.join(design_path, 'config.json')))
+    global COLOR, FONT, MATRIX, COLOR_MAP, FONT_MAP
+    COLOR = config['COLOR']
+    FONT = config['FONT']
+    MATRIX = config['MATRIX']
+    COLOR_MAP = list(COLOR.values())
+    FONT_MAP = [(os.path.join(design_path, v[0]), v[1]) for v in FONT.values()]
+    # Background image list
+    BGI_LIST = glob(os.path.join(design_path, 'image', '*.png'))
+
     lang = LANGUAGE_CODE[lang]
     # 60 -->0 까지 역순으로 카운트
     idx_savefile = 0
     for idx, (n_probs, time, use_color, use_char, use_font) in enumerate(options):
-        time_images = sorted(glob(os.path.join(f'datas/image/{n_probs}칸/times', '*.png')))
+        # 외국어에 대해서 문자 변환 불능
+        if lang != 'ko':
+            use_font = False
+        time_images = sorted(glob(os.path.join(f'{design_path}/image/{n_probs}칸/times', '*.png')))
         # 캔버스 생성
         background_img = Image.open(np.random.choice(BGI_LIST))
-        prob_matrix = Image.open(f'datas/image/{n_probs}칸/{n_probs}칸-문제지.png')
-        prob_question = Image.open(f'datas/image/{n_probs}칸/{n_probs}칸-질문-{lang}.png')
+        prob_matrix = Image.open(f'{design_path}/image/{n_probs}칸/{n_probs}칸-문제지.png')
+        prob_question = Image.open(f'{design_path}/image/{n_probs}칸/{n_probs}칸-질문-{lang}.png')
         canvas = Image.composite(prob_matrix, background_img, prob_matrix)
         canvas = Image.composite(prob_question, canvas, prob_question)
 

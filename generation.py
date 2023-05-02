@@ -11,8 +11,9 @@ from video import image_and_audio_to_video
 OUTPUT_ROOT_DIR = 'outputs'
 TEMP_DIR = 'temp'
 class GenarationDialog(QDialog):
-    def __init__(self, w, lang, diff, options):
+    def __init__(self, w, design_path, lang, diff, options):
         super().__init__(w)
+        self.design_path = design_path
         self.lang = lang
         # 난이도
         self.diff = diff
@@ -32,14 +33,13 @@ class GenarationDialog(QDialog):
         vbox.addWidget(btn)
         self.setLayout(vbox)
 
-
     def generation(self, times):
         try:
             times = int(times)
         except:
             print('wrong input :', times)
             return
-        self.genThread.setup(self.lang, self.diff, self.options, times)
+        self.genThread.setup(self.design_path, self.lang, self.diff, self.options, times)
         self.genThread.start()
 
 class GenThread(QThread):
@@ -48,7 +48,8 @@ class GenThread(QThread):
     def ___init__(self):
         super().__init__()
 
-    def setup(self, lang, diff, options, times):
+    def setup(self, design_path, lang, diff, options, times):
+        self.design_path = design_path
         self.lang = lang
         self.diff = diff
         self.options = options
@@ -63,12 +64,12 @@ class GenThread(QThread):
                 shutil.rmtree(image_dir)
             for language in self.lang:
                 # 문제에 해당하는 이미지 생성
-                make_images(language, self.diff, self.options, image_dir)
+                make_images(self.design_path, language, self.diff, self.options, image_dir)
                 # 이미지와 오디오를 합쳐서 비디오 생성
                 video_path = os.path.join(OUTPUT_ROOT_DIR, time_str, f'{i+1}번째_영상_{language}.mp4')
                 times = [option[1] for option in self.options]
                 print('times:', times)
-                image_and_audio_to_video(image_dir, None, video_path, language, times)
+                image_and_audio_to_video(self.design_path, image_dir, None, video_path, language, times)
 
 
             

@@ -1,11 +1,17 @@
 # 이미지
 *.png
-# 음성
+# 음악
 *.wav
+*.mp3
 # 영상
 *.mp4
 # 폰트
 *.otf
 *.ttf
+# 설정 파일
+*.json
 # configuration
 *.txt
+# cache
+__pycache__
+*.pyc

@@ -1,3 +1,4 @@
+import os
 import sys
 
 from PyQt5.QtWidgets import *
@@ -7,15 +8,18 @@ from generation import GenarationDialog
 
 QApplication.setAttribute(Qt.AA_EnableHighDpiScaling, True)
 
+DATAS = 'datas'
+
 class MainWindow(QWidget):
 
     def __init__(self):
         super().__init__()
         self.selectedList = [0]
+        self.design_list = sorted(os.listdir(DATAS))
         # 5의 배수로 설정
         self.problem_list = ['15',' 20', '25', '30', '35']
         self.problem_times = ['40', '50', '60']
-        self.table_columns = ['문제 수', '시간', '색상', '문자', '폰트']
+        self.table_columns = ['문제 수', '제한 시간', '색상', '문자', '폰트']
         self.foreign_languages = ['전체 선택', '한국어', '영어', '중국어', '일본어', '스페인어', '인도네시아어', '포르투갈어']
         self.initUI()
 
@@ -27,25 +31,56 @@ class MainWindow(QWidget):
         # initial vbox
         vbox = QVBoxLayout()
 
-        # 언어 선택 탭
+        # 디자인 선택 탭
+        label = QLabel('디자인 선택')
+        vbox.addWidget(label)
+        scrollArea = QScrollArea()
+        scrollArea.setFixedHeight(55)
+        gb = QGroupBox()
+        gb.setMinimumWidth(460)
+        gb.setMaximumHeight(100)
+        vvbox = QVBoxLayout()
         hbox = QHBoxLayout()
+        self.btns_design = QButtonGroup()
+        for i, dir in enumerate(self.design_list, start=1):
+            btn = QRadioButton(dir)
+            self.btns_design.addButton(btn, i-1)
+            hbox.addWidget(btn)
+            if i % 3 == 0:
+                vvbox.addLayout(hbox)
+                hbox = QHBoxLayout()
+        vvbox.addLayout(hbox)
+        gb.setLayout(vvbox)
+        scrollArea.setWidget(gb)
+        vbox.addWidget(scrollArea)
+        
+
+        # 언어 선택 탭
         label = QLabel('언어 선택')
         vbox.addWidget(label)
-        languages = ['한국어', '외국어']
 
-
-
-
-
-
-        self.btns_lang = QButtonGroup()
-        for i, l in enumerate(languages):
-            btn = QPushButton(l)
-            btn.setCheckable(True)
-            self.btns_lang.addButton(btn, i)
+        scrollArea = QScrollArea()
+        scrollArea.setFixedHeight(70)
+        gb = QGroupBox()
+        gb.setMinimumWidth(460)
+        gb.setMaximumHeight(100)
+        vvbox = QVBoxLayout()
+        hbox = QHBoxLayout()
+        self.btns_foreign = QButtonGroup()
+        self.btns_foreign.setExclusive(False)
+        for i, lan in enumerate(self.foreign_languages, start=1):
+            btn = QCheckBox(lan)
+            self.btns_foreign.addButton(btn, i-1)
             hbox.addWidget(btn)
-        self.btns_lang.buttonPressed[int].connect(self.press_lang)
-        vbox.addLayout(hbox)
+            if i % 3 == 0:
+                vvbox.addLayout(hbox)
+                hbox = QHBoxLayout()
+            if i == 1:
+                btn.clicked.connect(self.check_foreign)
+        vvbox.addLayout(hbox)
+        gb.setLayout(vvbox)
+        scrollArea.setWidget(gb)
+        vbox.addWidget(scrollArea)
 
         # 난이도 선택 탭
         hbox = QHBoxLayout()
@@ -105,40 +140,6 @@ class MainWindow(QWidget):
         vbox.addWidget(btn)
         self.dialog_add_row.setLayout(vbox)
         # ----------------------------------------------------------------
-        # 외국어 버튼 dialog
-        self.dialog_lang = QDialog(self)
-        self.dialog_lang.setWindowTitle('외국어 선택')
-        self.dialog_lang.resize(350, 150)
-        vbox = QVBoxLayout(self)
-        label = QLabel('중복 선택 가능')
-        vbox.addWidget(label)
-        # 외국어 체크박스
-        scrollArea = QScrollArea()
-        scrollArea.setMinimumHeight(100)
-        gb = QGroupBox()
-        vvbox = QVBoxLayout()
-        hbox = QHBoxLayout()
-        self.btns_foreign = QButtonGroup()
-        self.btns_foreign.setExclusive(False)
-        for i, lan in enumerate(self.foreign_languages, start=1):
-            btn = QCheckBox(lan)
-            self.btns_foreign.addButton(btn, i-1)
-            hbox.addWidget(btn)
-            if i % 3 == 0:
-                vvbox.addLayout(hbox)
-                hbox = QHBoxLayout()
-            if i == 1:
-                btn.clicked.connect(self.check_foreign)
-        vvbox.addLayout(hbox)
-        gb.setLayout(vvbox)
-        scrollArea.setWidget(gb)
-        vbox.addWidget(scrollArea)
-        # 가장 아래 OK 버튼
-        btn = QPushButton('OK')
-        btn.clicked.connect(self.dialog_lang.close)
-        vbox.addWidget(btn)
-        self.dialog_lang.setLayout(vbox)
-        # ----------------------------------------------------------------
 
     def table_changed(self):
         self.selectedList.clear()        
@@ -149,13 +150,6 @@ class MainWindow(QWidget):
          
         if self.table_quiz.rowCount()!=0 and len(self.selectedList) == 0:
             self.selectedList.append(0)
- 
-    def press_lang(self, id):
-        if id == 1:
-            if self.btns_lang.button(0).isChecked():
-                self.btns_lang.button(0).setChecked(False)
-            self.btns_lang.button(1).setChecked(True)
-            self.dialog_lang.show()
 
     def check_foreign(self):
         state = self.btns_foreign.button(0).isChecked()
@@ -179,12 +173,15 @@ class MainWindow(QWidget):
             btn_time = QComboBox()
             btn_time.addItems(self.problem_times)
             btn_time.setCurrentIndex(2)
-            btn_col = QPushButton('랜덤')
-            btn_text = QPushButton('랜덤')
-            btn_font = QPushButton('랜덤')
+            btn_col = QPushButton('단일')
+            btn_text = QPushButton('단일')
+            btn_font = QPushButton('단일')
             btn_col.setCheckable(True)
             btn_text.setCheckable(True)
             btn_font.setCheckable(True)
+            btn_col.pressed.connect(self.press_btn)
+            btn_text.pressed.connect(self.press_btn)
+            btn_font.pressed.connect(self.press_btn)
 
             if n_items >= 1:
                 cur_btn_cnt = self.table_quiz.cellWidget(n_items-1, 0)
@@ -213,14 +210,24 @@ class MainWindow(QWidget):
             self.table_quiz.setRowCount(n_items-i)
         self.selectedList = [self.table_quiz.rowCount()]
 
+    def press_btn(self):
+        if self.sender().isChecked():
+            self.sender().setText('단일')
+        else:
+            self.sender().setText('랜덤')
+
     def generate(self):
-        lang_id = self.btns_lang.checkedId()
-        if lang_id == 0:
-            lang = ['한국어']
-        elif lang_id == 1:
-            # 외국어 체크 리스트 추출
-            lang = [btn.text() for btn in self.btns_foreign.buttons() if btn.isChecked() and btn.text() != '전체 선택']
-            print('foreign', lang)
+        # 디자인 선택 혹은 언어 선택을 하지 않으면 실행 안 함
+        if self.check_btns() is False:
+            return
+
+        # 디자인 체크 인덱스 
+        design_id = self.btns_design.checkedId()
+        design_path = os.path.join(DATAS, self.design_list[design_id])
+        print('design_path: %s' % design_path)
+
+        # 언어 체크 리스트 추출
+        lang = [btn.text() for btn in self.btns_foreign.buttons() if btn.isChecked() and btn.text() != '전체 선택']
 
         diff = self.btns_diff.checkedId()
         n_items = self.table_quiz.rowCount()
@@ -236,8 +243,24 @@ class MainWindow(QWidget):
             use_char  = self.table_quiz.cellWidget(i, 3).isChecked()
             use_font  = self.table_quiz.cellWidget(i, 4).isChecked()
             options.append((n_prob, time_prob, use_color, use_char, use_font))
-        genDialog = GenarationDialog(self, lang, diff, options)
+        genDialog = GenarationDialog(self, design_path, lang, diff, options)
         genDialog.exec()
+
+    def check_btns(self):
+        # 디자인 버튼이 하나도 선택되지 않으면 False
+        for btn in self.btns_design.buttons():
+            if btn.isChecked():
+                break
+        else:
+            return False
+        # 언어 박스가 하나도 선택되지 않으면 False
+        for btn in self.btns_foreign.buttons():
+            if btn.isChecked():
+                break
+        else:
+            return False
+        return True
+        
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
