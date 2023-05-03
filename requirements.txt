@@ -1,0 +1,4 @@
+Pyqt5
+numpy
+pillow
+moviepy
