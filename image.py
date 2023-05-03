@@ -60,7 +60,7 @@ def make_images(design_path, lang, diff, options, save_dir='outputs'):
     lang : language
     diff : diffuculty
     '''
-    config = json.load(open(os.path.join(design_path, 'config.json')))
+    config = json.load(open(os.path.join(design_path, 'config.json'), encoding='utf-8'))
     global COLOR, FONT, MATRIX, COLOR_MAP, FONT_MAP
     COLOR = config['COLOR']
     FONT = config['FONT']
