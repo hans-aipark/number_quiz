@@ -10,8 +10,8 @@ from moviepy.editor import AudioFileClip, CompositeAudioClip, ImageClip, ImageSe
 
 def image_and_audio_to_video(design_path, image_dir, audio_path, output_path, language, times):
 
-    INTRO_PATH = os.path.join(design_path, 'video', 'intro_남자.mp4')
-    OUTRO_PATH = os.path.join(design_path, 'video', 'outro_남자.mp4')
+    INTRO_PATH = os.path.join(design_path, 'video', f'intro_{language}.mp4')
+    OUTRO_PATH = os.path.join(design_path, 'video', f'outro_{language}.mp4')
     BRIDGE_PATH = os.path.join(design_path, 'video', 'bridge.mp4')
     BGM_PATH = os.path.join(design_path, 'sound')
 

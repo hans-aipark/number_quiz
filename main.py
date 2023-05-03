@@ -1,5 +1,6 @@
 import os
 import sys
+from glob import glob
 
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -17,7 +18,7 @@ class MainWindow(QWidget):
         self.selectedList = [0]
         self.design_list = sorted(os.listdir(DATAS))
         # 5의 배수로 설정
-        self.problem_list = ['15',' 20', '25', '30', '35']
+        self.problem_list = []
         self.problem_times = ['40', '50', '60']
         self.table_columns = ['문제 수', '제한 시간', '색상', '문자', '폰트']
         self.foreign_languages = ['전체 선택', '한국어', '영어', '중국어', '일본어', '스페인어', '인도네시아어', '포르투갈어']
@@ -157,6 +158,13 @@ class MainWindow(QWidget):
             btn.setChecked(state)
 
     def add_row(self, iteration=1):
+        # 디자인 선택 혹은 언어 선택을 하지 않으면 실행 안 함
+        if self.check_btns() is False:
+            return
+        contents_dir = self.btns_design.checkedButton().text()
+
+        self.problem_list = [os.path.basename(path)[:-1] for path in sorted(glob(os.path.join(DATAS, contents_dir, 'image', '*칸')))]
+
         print(iteration)
         try:
             iteration = int(iteration)
@@ -169,7 +177,7 @@ class MainWindow(QWidget):
 
             btn_cnt = QComboBox()
             btn_cnt.addItems(self.problem_list)
-            btn_cnt.setCurrentIndex(2)
+            btn_cnt.setCurrentIndex(0)
             btn_time = QComboBox()
             btn_time.addItems(self.problem_times)
             btn_time.setCurrentIndex(2)
