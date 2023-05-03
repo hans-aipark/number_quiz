@@ -70,6 +70,7 @@ class GenThread(QThread):
                 times = [option[1] for option in self.options]
                 print('times:', times)
                 image_and_audio_to_video(self.design_path, image_dir, None, video_path, language, times)
+        shutil.rmtree(TEMP_DIR)
 
 
             

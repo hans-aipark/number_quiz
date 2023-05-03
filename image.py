@@ -5,7 +5,7 @@ import numpy as np
 from glob import glob
 
 from PIL import Image, ImageDraw, ImageFont
-from config import NUM_to_HAN, COLOR, FONT, MATRIX, LANGUAGE_CODE
+from config import NUM_to_HAN, LANGUAGE_CODE
 
 import logging
 logging.getLogger("PIL").setLevel(logging.WARNING)
