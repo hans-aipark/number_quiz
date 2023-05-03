@@ -195,6 +195,12 @@ class MainWindow(QWidget):
                 btn_col.setChecked(cur_btn_col.isChecked())
                 btn_text.setChecked(cur_btn_text.isChecked())
                 btn_font.setChecked(cur_btn_font.isChecked())
+                if cur_btn_col.isChecked():
+                     btn_col.setText('랜덤')
+                if cur_btn_text.isChecked():
+                    btn_text.setText('랜덤')
+                if cur_btn_font.isChecked():
+                    btn_font.setText('랜덤')
 
             self.table_quiz.setCellWidget(n_items, 0, btn_cnt)
             self.table_quiz.setCellWidget(n_items, 1, btn_time)
