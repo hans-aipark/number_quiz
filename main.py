@@ -17,6 +17,8 @@ class MainWindow(QWidget):
         super().__init__()
         self.selectedList = [0]
         self.design_list = sorted(os.listdir(DATAS))
+        if 'README.md' in os.listdir(DATAS):
+            self.design_list.remove('README.md')
         # 5의 배수로 설정
         self.problem_list = []
         self.problem_times = ['40', '50', '60']
